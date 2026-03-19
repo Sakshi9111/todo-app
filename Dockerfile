@@ -5,6 +5,11 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 # Install dependencies
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+    
 RUN apt-get update && apt-get install --no-install-recommends -y \
         postgresql-client \
         libpq-dev \
