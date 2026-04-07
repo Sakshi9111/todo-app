@@ -20,12 +20,13 @@ Including another URLconf
 # urlpatterns = [
 #     path('admin/', admin.site.urls),
 # ]
-
+from django.http import HttpResponse
 from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('health/', lambda request: HttpResponse("ok")),  # 👈 add this line
     path("todos/", include("todos.urls")),
     path("", include("todos.urls")),  # Make todos the homepage
     path("accounts/", include("accounts.urls")),
