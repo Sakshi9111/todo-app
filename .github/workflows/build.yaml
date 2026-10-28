@@ -59,13 +59,13 @@ jobs:
           ref: ${{ env.MANIFEST_BRANCH }}
           token: ${{ secrets.MANIFEST_REPO_TOKEN }}
 
-  #     - name: Update image tag in django-deployment.yaml
-  #       env:
-  #         NEW_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.tag }}
-  #       run: |
-  #         sed -i -E "s|(image:[[:space:]]*)[^[:space:]]*${IMAGE_NAME}[^[:space:]]*|\1${NEW_IMAGE}|" "${MANIFEST}"
-  #         echo "Updated manifest:"
-  #         grep -n "image:" "${MANIFEST}"
+      - name: Update image tag in django-deployment.yaml
+        env:
+          NEW_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.tag }}
+        run: |
+          sed -i -E "s|(image:[[:space:]]*)[^[:space:]]*${IMAGE_NAME}[^[:space:]]*|\1${NEW_IMAGE}|" "${MANIFEST}"
+          echo "Updated manifest:"
+          grep -n "image:" "${MANIFEST}"
 
   #     - name: Commit and push to broadway-labs
   #       run: |
