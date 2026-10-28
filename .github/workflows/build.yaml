@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: 98543218/todo-web                       # <-- Docker Hub repo name
+  IMAGE_NAME: todo-web                       # <-- Docker Hub repo name
   MANIFEST_REPO: Sakshi9111/broadway-labs      # <-- repo that holds the manifest
   MANIFEST_BRANCH: main
   MANIFEST: day10/kubernetes/k8s_file/django-deployment.yaml
