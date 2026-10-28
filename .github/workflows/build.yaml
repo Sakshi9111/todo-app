@@ -67,15 +67,15 @@ jobs:
           echo "Updated manifest:"
           grep -n "image:" "${MANIFEST}"
 
-  #     - name: Commit and push to broadway-labs
-  #       run: |
-  #         git config user.name  "github-actions[bot]"
-  #         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-  #         if git diff --quiet; then
-  #           echo "No changes to commit."
-  #           exit 0
-  #         fi
-  #         git add "${MANIFEST}"
-  #         git commit -m "ci: update django image to ${{ needs.build-and-push.outputs.tag }}"
-  #         git pull --rebase origin "${MANIFEST_BRANCH}"
-  #         git push origin "${MANIFEST_BRANCH}"
+      - name: Commit and push to broadway-labs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git add "${MANIFEST}"
+          git commit -m "ci: update django image to ${{ needs.build-and-push.outputs.tag }}"
+          git pull --rebase origin "${MANIFEST_BRANCH}"
+          git push origin "${MANIFEST_BRANCH}"
