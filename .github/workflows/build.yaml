@@ -1,0 +1,81 @@
+# Place in the todo-app repo: .github/workflows/docker-build-deploy.yml
+name: Build, Push Image and Update Manifest Repo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: 98543218/todo-web                       # <-- Docker Hub repo name
+  MANIFEST_REPO: Sakshi9111/broadway-labs      # <-- repo that holds the manifest
+  MANIFEST_BRANCH: main
+  MANIFEST: day10/kubernetes/k8s_file/django-deployment.yaml
+
+concurrency:
+  group: update-manifest
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.vars.outputs.tag }}
+    steps:
+      - name: Checkout todo-app
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: vars
+        run: echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .                 # <-- change if Dockerfile is in a subfolder
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.tag }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+  # update-manifest:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout broadway-labs
+  #       uses: actions/checkout@v4
+  #       with:
+  #         repository: ${{ env.MANIFEST_REPO }}
+  #         ref: ${{ env.MANIFEST_BRANCH }}
+  #         token: ${{ secrets.MANIFEST_REPO_TOKEN }}
+
+  #     - name: Update image tag in django-deployment.yaml
+  #       env:
+  #         NEW_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.tag }}
+  #       run: |
+  #         sed -i -E "s|(image:[[:space:]]*)[^[:space:]]*${IMAGE_NAME}[^[:space:]]*|\1${NEW_IMAGE}|" "${MANIFEST}"
+  #         echo "Updated manifest:"
+  #         grep -n "image:" "${MANIFEST}"
+
+  #     - name: Commit and push to broadway-labs
+  #       run: |
+  #         git config user.name  "github-actions[bot]"
+  #         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  #         if git diff --quiet; then
+  #           echo "No changes to commit."
+  #           exit 0
+  #         fi
+  #         git add "${MANIFEST}"
+  #         git commit -m "ci: update django image to ${{ needs.build-and-push.outputs.tag }}"
+  #         git pull --rebase origin "${MANIFEST_BRANCH}"
+  #         git push origin "${MANIFEST_BRANCH}"
